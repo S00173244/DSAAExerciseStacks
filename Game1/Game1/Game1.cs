@@ -1,9 +1,11 @@
 ﻿using Engine.Engines;
+using Helpers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Screens;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -19,6 +21,8 @@ namespace Game1
         Stack<SplashScreen> splashScreens = new Stack<SplashScreen>();
         SplashScreen pauseScreen;
         SplashScreen playScreen;
+        ActiveScreenState currentScreenState = ActiveScreenState.PLAY;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -78,7 +82,35 @@ namespace Game1
             // Exit();
 
             // TODO: Add your update logic here
-            if (splashScreens.Peek().Active) splashScreens.Peek().Update();
+
+            if (InputEngine.CurrentKeyState.IsKeyDown(Keys.P) && currentScreenState == ActiveScreenState.PLAY)
+            {
+                splashScreens.Peek().Update();
+                currentScreenState = ActiveScreenState.PAUSE;
+                splashScreens.Peek().Active = true;
+                splashScreens.Peek().Update();
+                Console.WriteLine(splashScreens.Count);
+                SplashScreen splash = splashScreens.Pop();
+                splashScreens.Peek().Active = false;
+                
+                splashScreens.Push(splash);
+
+            }
+            else if (InputEngine.CurrentKeyState.IsKeyDown(Keys.Escape) && currentScreenState == ActiveScreenState.PAUSE)
+            {
+                currentScreenState = ActiveScreenState.PLAY;
+                
+                SplashScreen splash =  splashScreens.Pop();
+                splashScreens.Peek().Update();
+                splashScreens.Peek().Active = true;
+                splashScreens.Peek().Update();
+                splashScreens.Push(splash);
+                splashScreens.Peek().Active = false;
+                
+                Console.WriteLine(splashScreens.Count);
+            }
+
+            
             
             base.Update(gameTime);
         }
@@ -93,7 +125,10 @@ namespace Game1
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            splashScreens.Peek().Draw(spriteBatch);
+            foreach (SplashScreen item in splashScreens)
+            {
+                item.Draw(spriteBatch);
+            }
             spriteBatch.End();
             base.Draw(gameTime);
         }
