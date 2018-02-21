@@ -17,6 +17,7 @@ namespace Screens
         Texture2D _tx;
         public bool Active { get; set; }
 
+        public ActiveScreenState screenType { get; set; }
         public Texture2D Tx
         {
             get

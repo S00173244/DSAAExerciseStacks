@@ -21,6 +21,7 @@ namespace Game1
         Stack<SplashScreen> splashScreens = new Stack<SplashScreen>();
         SplashScreen pauseScreen;
         SplashScreen playScreen;
+        SplashScreen currentScreen;
         ActiveScreenState currentScreenState = ActiveScreenState.PLAY;
 
         public Game1()
@@ -55,10 +56,11 @@ namespace Game1
             pauseScreen = new SplashScreen(Vector2.Zero, Content.Load<Texture2D>("pause"), Content.Load<Song>("pauseSong"), Keys.P);
             playScreen = new SplashScreen(Vector2.Zero, Content.Load<Texture2D>("play"), Content.Load<Song>("playSong"), Keys.Escape);
             playScreen.Active = true;
-            
-            splashScreens.Push(playScreen);
             splashScreens.Push(pauseScreen);
-
+            splashScreens.Push(playScreen);
+            
+            currentScreen = splashScreens.Pop();
+            
             // TODO: use this.Content to load your game content here
         }
 
@@ -83,32 +85,19 @@ namespace Game1
 
             // TODO: Add your update logic here
 
-            if (InputEngine.CurrentKeyState.IsKeyDown(Keys.P) && currentScreenState == ActiveScreenState.PLAY)
+            currentScreen.Update();
+
+            if (InputEngine.IsKeyPressed(Keys.P))
             {
-                splashScreens.Peek().Update();
-                currentScreenState = ActiveScreenState.PAUSE;
-                splashScreens.Peek().Active = true;
-                splashScreens.Peek().Update();
-                Console.WriteLine(splashScreens.Count);
-                SplashScreen splash = splashScreens.Pop();
-                splashScreens.Peek().Active = false;
-                
-                splashScreens.Push(splash);
+                SplashScreen temp;
+                currentScreen.Active = false;
+                temp = splashScreens.Pop();
+                splashScreens.Push(currentScreen);
+                currentScreen = temp;
+                currentScreen.Active = true;
 
             }
-            else if (InputEngine.CurrentKeyState.IsKeyDown(Keys.Escape) && currentScreenState == ActiveScreenState.PAUSE)
-            {
-                currentScreenState = ActiveScreenState.PLAY;
-                
-                SplashScreen splash =  splashScreens.Pop();
-                splashScreens.Peek().Update();
-                splashScreens.Peek().Active = true;
-                splashScreens.Peek().Update();
-                splashScreens.Push(splash);
-                splashScreens.Peek().Active = false;
-                
-                Console.WriteLine(splashScreens.Count);
-            }
+           
 
             
             
@@ -125,10 +114,10 @@ namespace Game1
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            foreach (SplashScreen item in splashScreens)
-            {
-                item.Draw(spriteBatch);
-            }
+            
+
+            currentScreen.Draw(spriteBatch);
+
             spriteBatch.End();
             base.Draw(gameTime);
         }
